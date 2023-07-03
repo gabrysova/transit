@@ -1,0 +1,58 @@
+version: '3'
+services:
+
+####### TIMESCALEDB #######
+ timescaledb:
+   build: ./docker/timescaledb
+   command: postgres -c 'max_connections=200'
+   container_name: timescaledb
+   volumes:
+     - timescaledb:/var/lib/postgresql/data
+   ports:
+     - 5432:5432
+   environment:
+     - POSTGRES_PASSWORD=password
+   networks:
+     - main-net
+
+####### PGADMIN #######
+ pgadmin:
+   image: dpage/pgadmin4
+   container_name: pgadmin
+   ports:
+     - 8088:80
+   volumes:
+     - pgadmin:/var/lib/pgadmin
+   environment:
+     - PGADMIN_DEFAULT_EMAIL=transit@email.it
+     - PGADMIN_DEFAULT_PASSWORD=password
+     - PGADMIN_CONFIG_CONSOLE_LOG_LEVEL=40
+   networks:
+     - main-net     
+     
+     
+###### AUTH-SERVER DOCKERIZED ######
+ auth-server:
+   build: ./docker/auth-server
+   container_name: auth-server
+   volumes:
+     - ../../auth-server/target/classes/application.properties:/usr/local/application/external-config/application.properties:ro
+     - ../../auth-server/target/auth-server-0.0.1-SNAPSHOT.jar:/usr/local/application/auth-server-0.0.1-SNAPSHOT.jar:ro
+   
+   ports:
+     - 8090:8082
+   networks:
+     - main-net
+
+     
+     
+####### VOLUMES ######
+volumes:
+ timescaledb:
+ pgadmin:
+
+###### MAIN-NET #######
+networks:
+ main-net:
+ 
+ 
